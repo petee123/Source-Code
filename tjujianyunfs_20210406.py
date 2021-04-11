@@ -49,9 +49,9 @@ num_random_sample = 5
 lambd = 0.4
 package = 'sklearn'
 method = 'train'
-origin_result, method, name = 1, None, None
+origin_result, method, name = 1, "train", None
 num_process, infos = 24, []
-multiprocessing=True
+multiprocessing=False
  
 class Controller:
     
@@ -289,8 +289,8 @@ import tensorflow as tf
 
 
 
-def get_reward(actions, path, num_op_unary, num_op_binary, max_order, num_batch, optimizer, lr, epochs, evaluate, task, dataset, model, alpha, lr_value, RL_model, reg, controller, num_random_sample, lambd, multiprocessing, package, method, origin_result):
-	# global path, num_op_unary, num_op_binary, max_order, num_batch, optimizer, lr, epochs, evaluate, task, dataset, model, alpha, lr_value, RL_model, reg, controller, num_random_sample, lambd, multiprocessing, package, method, origin_result
+def get_reward(actions):
+	global path, num_op_unary, num_op_binary, max_order, num_batch, optimizer, lr, epochs, evaluate, task, dataset, model, alpha, lr_value, RL_model, reg, controller, num_random_sample, lambd, multiprocessing, package, method, origin_result
 	print ("path: " + path)
 	X = pd.read_csv(path)
 	num_feature = X.shape[1] - 1
@@ -368,6 +368,7 @@ def get_reward(actions, path, num_op_unary, num_op_binary, max_order, num_batch,
 					copies[key], action_per_feature, former_result, former_copys)
 				former_copys.append(return_copy)
 				rewards += reward
+			print("reward in after training process: ", reward)
 			return rewards
 		
 		elif method == 'test':
@@ -429,20 +430,19 @@ def random_run(nnum_random_sample, nmodel, l=None, p=None):
 	if multiprocessing:	
 		if package == 'sklearn':
 			pool = Pool(num_process)    
-		res = list(pool.map(get_reward, samples, path, num_op_unary, num_op_binary, max_order, num_batch, optimizer, lr, epochs, evaluate, task, dataset, model, alpha, lr_value, RL_model, reg, controller, num_random_sample, lambd, multiprocessing, package, method, origin_result))
+		res = list(pool.map(get_reward, samples))
 		pool.close()
 		pool.join()
 	else:
 		res = []
 		for sample in samples:
-			res.append(get_reward(sample, path, num_op_unary, num_op_binary, max_order, num_batch, optimizer, lr, epochs, evaluate, task, dataset, model, alpha, lr_value, RL_model, reg, controller, num_random_sample, lambd, multiprocessing, package, method, origin_result))
+			res.append(get_reward(sample))
 
 	random_result = max(res)
 	random_sample = samples[res.index(random_result)]
 
 	return random_result, random_sample
-
-
+    
 def train(nmodel, l=None, p=None):
 	global path, num_op_unary, num_op_binary, max_order, num_batch, optimizer, lr, epochs, evaluate, task, dataset, model, alpha, lr_value, RL_model, reg, controller, num_random_sample, lambd, multiprocessing, package, infos, method, origin_result, num_process
 	print ("path: " + path)
@@ -495,13 +495,13 @@ def train(nmodel, l=None, p=None):
 			if multiprocessing:
 				if package == 'sklearn':
 					pool = Pool(num_process)        
-				rewards = np.array(pool.map(get_reward, concat_action, path, num_op_unary, num_op_binary, max_order, num_batch, optimizer, lr, epochs, evaluate, task, dataset, model, alpha, lr_value, RL_model, reg, controller, num_random_sample, lambd, multiprocessing, package, method, origin_result))
+				rewards = np.array(pool.map(get_reward, concat_action))
 				pool.close()
 				pool.join()
 			else:
 				rewards = []
 				for action in concat_action:
-					rewards.append(get_reward(action, path, num_op_unary, num_op_binary, max_order, num_batch, optimizer, lr, epochs, evaluate, task, dataset, model, alpha, lr_value, RL_model, reg, controller, num_random_sample, lambd, multiprocessing, package, method, origin_result))
+					rewards.append(get_reward(action))
 				rewards = np.array(rewards)
 
 			method = 'test'
@@ -514,7 +514,7 @@ def train(nmodel, l=None, p=None):
 			else:
 				results = []
 				for action in concat_action:
-					results.append(get_reward(action, path, num_op_unary, num_op_binary, max_order, num_batch, optimizer, lr, epochs, evaluate, task, dataset, model, alpha, lr_value, RL_model, reg, controller, num_random_sample, lambd, multiprocessing, package, method, origin_result))
+					results.append(get_reward(action))
 			nmodel_result = max(nmodel_result, max(results))
 
 
@@ -569,8 +569,7 @@ def train(nmodel, l=None, p=None):
 			method = 'test'
 			probs_action = sess.run(tf.compat.v1.nn.softmax(nmodel.concat_output))
 			best_action = probs_action.argmax(axis=1)
-			nmodel_result = max(nmodel_result, get_reward(best_action, path, num_op_unary, num_op_binary, max_order, num_batch, optimizer, lr, epochs, evaluate, task, dataset, model, alpha, lr_value, RL_model, reg, controller, num_random_sample, lambd, multiprocessing, package, method, origin_result))
-
+			nmodel_result = max(nmodel_result, get_reward(best_action))
 			random_result, random_sample = random_run(num_random_sample, nmodel, l, p)
 
 			best_result = max(best_result, nmodel_result)
@@ -637,7 +636,7 @@ def main(pnum_op_unary=4, pnum_op_binary=5, pmax_order=5, pnum_batch=32, poptimi
 # BMI
 if __name__ == '__main__':
     multiprocessing.freeze_support()
-    main(3, 4, 5, 32, 'adam', 0.01, 1, 'r2', 'regression', 'BMI', 'RF', 0.99, 1e-3, 'PG', 1e-5, 'rnn', 5, 0.4, True, 'sklearn')
+    main(3, 4, 5, 32, 'adam', 0.01, 1, 'r2', 'regression', 'BMI', 'RF', 0.99, 1e-3, 'PG', 1e-5, 'rnn', 5, 0.4, False, 'sklearn')
 
 
 # airfoil
