@@ -14,12 +14,12 @@ from sklearn.model_selection import train_test_split
 # define global variable  
 # path, num_op_unary, num_op_binary, max_order, num_batch, optimizer, lr, epochs, evaluate, task, dataset, model, alpha, lr_value, RL_model, reg, controller, num_random_sample, lambd, multiprocessing, package, method, origin_result, num_process, infos
 # Moment 
-# global variable assign the default value outside the main
+# global variable assign the default value outside the main																																										``
 dataset = "BMI"
 #path = './dataset/' + dataset + '.csv'
 path = dataset + '.csv'
 num_op_unary = 3
-num_op_binary = 5
+num_op_binary = 5   
 max_order = 5
 num_batch = 32
 optimizer = 'adam'
@@ -203,7 +203,7 @@ def evaluate1(X, y, num_op_unary, num_op_binary, max_order, num_batch, optimizer
 			r_r2 = cross_val_score(model, X, y, cv=5).mean()
 			return r_r2
 		elif evaluate == 'rae':
-			print("rae")
+			print_file("rae")
 			y_mean = statistics.mean(y)
 			X1 = X.copy()
 			y1 = y.copy()
@@ -313,7 +313,7 @@ def save_result(infos, name):
 	with open(save_path, 'w') as f:
 		for info in infos:
 			f.write(str(info) + '\n')
-	print(name, 'saved')
+	print_file(name + 'saved')
 
 import logging
 # from Controller import Controller, Controller_sequence, Controller_pure
@@ -340,8 +340,9 @@ import tensorflow as tf
 def get_reward(actions):
 	global path, num_op_unary, num_op_binary, max_order, num_batch, optimizer, lr, epochs, evaluate, task, dataset, model, alpha, lr_value, RL_model, reg, controller, num_random_sample, lambd, multiprocessing, package, method, origin_result
 	
-	print("################## get_reward start ##################")
-	print ("path: " + path)
+	print_file("################## get_reward start ##################")
+	print_file ("path: " + str(path))
+	print_file (str("get_reward input actions: " + ' '.join(map(str, actions))))
 	X = pd.read_csv(path)
 	num_feature = X.shape[1] - 1
 	action_per_feature = int(len(actions) / num_feature)
@@ -350,20 +351,21 @@ def get_reward(actions):
 	try:
 		for feature_count in range(num_feature):
 			feature_name = X.columns[feature_count]
-			print("feature_name is ", feature_name)
+			print_file("feature_name is " + str(feature_name))
+			print_file("feature_count is " + str(feature_count))
 			feature_actions = actions[feature_count*action_per_feature: (feature_count+1)*action_per_feature]
+			print_file ("selected feature actions: " + ' '.join(map(str, feature_actions)))
 			copies[feature_count] = []
 			if feature_actions[0] == 0:
 				continue
 			else:
 				copy = np.array(X[feature_name].values)	
 
-			print("num_op_unary is ", num_op_unary) 
-			print("feature_count is ", feature_count)
-			print("feature value is ", ' '.join(map(str, copy)))
+			print_file("num_op_unary is " + str(num_op_unary))
+			print_file("feature value before aciton: " + ' '.join(map(str, copy)))
    
 			for action in feature_actions:
-				print("feature action is ", action)
+				print_file("feature action is " + str(action))
 				if action == 0:
 					break
 										  
@@ -385,7 +387,6 @@ def get_reward(actions):
 						while (np.any(copy == 0)):
 							copy = copy + 1e-5
 						copy = np.squeeze(1 / (np.array(copy))) 
-						
 				else:
 					action_binary = (action-num_op_unary-1) // (num_feature-1)
 					rank = np.mod(action-num_op_unary-1, num_feature-1)
@@ -407,25 +408,29 @@ def get_reward(actions):
 						copy = np.squeeze(copy / target) 
 					elif action_binary == 4:
 						copy = np.squeeze(mod_column(copy, X[target_feature_name].values))
-
+				print_file("feature value after aciton: "+ ' '.join(map(str, copy)))
 				copies[feature_count].append(copy)
 			copies_run.append(copy)
 
-		print("Finish feature action looping")
-		print("method is: ", method)
+		print_file("Finish feature action looping")
+		print_file("method is: " + str(method))
 		if method == 'train':
-			print("this round train original result: ", origin_result)
+			print_file("this round train original result: " + str(origin_result))
 			former_result = origin_result
 			former_copys = [None]
 			for key in sorted(copies.keys()):
 				reward, former_result, return_copy = get_reward_per_feature( 
 					copies[key], action_per_feature, former_result, former_copys)
+				if(return_copy is None):
+					print_file("returned copy after get_reward_per_feature(): None")
+				else:
+					print_file("returned copy after get_reward_per_feature(): " + ' '.join(map(str, return_copy)))	
+				print_file("reward after training process: " + str(reward))
 				former_copys.append(return_copy)
 				rewards += reward
-				print("reward in after training process: ", reward)
-			
-			print(" rewards result is : ", ' '.join(map(str, rewards)))
-			print("############################## get reward end ##############################")
+
+			print_file(" rewards result is : " + ' '.join(map(str, rewards)))
+			print_file("############################## get reward end ##############################")
 			return rewards
 
 		elif method == 'test':
@@ -436,15 +441,15 @@ def get_reward(actions):
 				y = X[X.columns[-1]]
 				del X[X.columns[-1]]
 				result = evaluate1(X, y, num_op_unary, num_op_binary, max_order, num_batch, optimizer, lr, epochs, evaluate, task, dataset, model, alpha, lr_value, RL_model, reg, controller, num_random_sample, lambd, multiprocessing, package)
-				print("result after test process: ", result)
-			print("############################## get reward end ##############################")		   
+				print_file("result after test process: "+ str(result))
+			print_file("############################## get reward end ##############################")		   
 			return result
 	except RuntimeError as e:
-		print("RuntimeError: ", e)
+		print_file("RuntimeError: " + str(e))
 
 def get_reward_per_feature(copies, count, former_result, former_copys=[None]):
 	global path, num_op_unary, num_op_binary, max_order, num_batch, optimizer, lr, epochs, evaluate, task, dataset, model, alpha, lr_value, RL_model, reg, controller, num_random_sample, lambd, multiprocessing, package, origin_result
-	print ("path: " + path)
+	print_file ("path: " + path)
 	X = pd.read_csv(path)
 	if package == 'sklearn':
 		y = X[X.columns[-1]]
@@ -504,19 +509,19 @@ def random_run(nnum_random_sample, nmodel, l=None, p=None):
 	
 def train(nmodel, l=None, p=None):
 	global path, num_op_unary, num_op_binary, max_order, num_batch, optimizer, lr, epochs, evaluate, task, dataset, model, alpha, lr_value, RL_model, reg, controller, num_random_sample, lambd, multiprocessing, package, infos, method, origin_result, num_process
-	print ("path: " + path)
+	print_file ("path: " + path)
 	X = pd.read_csv(path)
-	print(X)
+	print_file(X)
 	if package == 'sklearn':
 		y = X[X.columns[-1]]
 		del X[X.columns[-1]]
-		print(X.shape)
+		print_file(X.shape)
 
 		origin_result = evaluate1(X, y, num_op_unary, num_op_binary, max_order, num_batch, optimizer, lr, epochs, evaluate, task, dataset, model, alpha, lr_value, RL_model, reg, controller, num_random_sample, lambd, multiprocessing, package)	
 	best_result = origin_result
-	print("origin_result is: ", origin_result)
+	print_file("origin_result is: " + str(origin_result))
  
-	print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
+	print_file("Num GPUs Available: "+ str(len(tf.config.list_physical_devices('GPU'))))
  
 	gpus = tf.config.list_physical_devices('GPU')
 	if gpus:
@@ -525,9 +530,9 @@ def train(nmodel, l=None, p=None):
 			tf.config.experimental.set_visible_devices(gpus[0], 'GPU')
 			logical_gpus = tf.config.experimental.list_logical_devices('GPU')
 			tf.config.experimental.set_memory_growth(gpus[0], True)
-			print("There are ", len(gpus), " Physical GPUs,", " and ", len(logical_gpus), " Logical GPU")
+			print_file("There are " + str(len(gpus)) + " Physical GPUs," + " and " + str(len(logical_gpus)) + " Logical GPU")
 		except RuntimeError as e: # Visible devices must be set before GPUs have been initialized
-			print(e)
+			print_file(e)
    
 	opts = tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=0.4)
 	#config = tf.compat.v1.ConfigProto(inter_op_parallelism_threads=1, intra_op_parallelism_threads=1, gpu_options=opts)
@@ -626,27 +631,29 @@ def train(nmodel, l=None, p=None):
 
 
 			method = 'test'
+			print_file("################### start testing process ###################")
 			probs_action = sess.run(tf.compat.v1.nn.softmax(nmodel.concat_output))
 			best_action = probs_action.argmax(axis=1)
 			nmodel_result = max(nmodel_result, get_reward(best_action))
 			random_result, random_sample = random_run(num_random_sample, nmodel, l, p)
-
+			print_file('best_result: ' + str(best_result))
+			print_file('nmodel_result: ' + str(nmodel_result))
+			if(nmodel_result > best_result):
+				print_file('updated best result from ' + str(best_result) + ' to ' + str(nmodel_result))
 			best_result = max(best_result, nmodel_result)
 
 #			global path, num_op_unary, num_op_binary, max_order, num_batch, optimizer, lr, epochs, evaluate, task, dataset, model, alpha, lr_value, RL_model, reg, controller, num_random_sample, lambd, multiprocessing, package, infos, method, origin_result, num_process
 			
-			print('Epoch-' + str(epoch_count+1))
-			print('loss-' + str(loss_epoch))
-			print('origin_result-' + str(origin_result))
-			print('lr-' + str(lr))
-			print('model_result-' + str(nmodel_result))
-			print('best_action-' + str(best_action))
-			print('best_result-' + str(best_result))
-			print('random_result-' + str(random_result))
-			print('random_sample-' + str(random_sample))
-			
-			
-			
+			print_file('Epoch: ' + str(epoch_count+1))
+			print_file('loss: ' + str(loss_epoch))			
+			print_file('lr: ' + str(lr))
+			print_file('origin_result: ' + str(origin_result))
+			print_file('model_result: ' + str(nmodel_result))
+			print_file('best_action: ' + str(best_action))
+			print_file('best_result: ' + str(best_result))
+			print_file('random_result: ' + str(random_result))
+			print_file('random_sample: ' + str(random_sample))
+
 			# % (epoch_count+1, loss_epoch, origin_result, lr, nmodel_result, str(best_action), best_result, random_result, str(random_sample)))
 			logging.info('Epoch %d: loss = %.4f, origin_result = %.4f, lr = %.3f, \n model_result = %.4f, best_action = %s, \n best_result = %.4f, random_result = %.4f, random_sample = %s' )
 			# % (epoch_count+1, loss_epoch, origin_result, lr, nmodel_result, str(best_action), best_result, random_result, str(random_sample)))
@@ -686,7 +693,7 @@ def main(pnum_op_unary=4, pnum_op_binary=5, pmax_order=5, pnum_batch=32, poptimi
 	origin_result, method, name = None, None, None
 	num_process, infos = 24, []
 	name = init_name_and_log(num_op_unary, num_op_binary, max_order, num_batch, optimizer, lr, epochs, evaluate, task, dataset, model, alpha, lr_value, RL_model, reg, controller, num_random_sample, lambd, multiprocessing, package)
-	print("name: ", name)
+	print_file("name: " + name)
 
 	num_feature = pd.read_csv(path).shape[1] - 1
 	if controller == 'rnn':
@@ -701,10 +708,24 @@ def main(pnum_op_unary=4, pnum_op_binary=5, pmax_order=5, pnum_batch=32, poptimi
 
 	save_result(infos, name)
 	
-	print("end")
+	print_file("end")
+ 
+from datetime import datetime
 
+dateTimeObj = datetime.now()
+timestampStr = dateTimeObj.strftime("%Y%m%d%H%M%S")
+log_file_name = "./log/log_" + timestampStr + ".log"
 
-# need to implement 1-rae
+def print_file(msg):
+	print(str(msg))
+	# Open a file with access mode 'a'
+	file_object = open(log_file_name, 'a')
+ 
+	# Append 'hello' at the end of file
+	file_object.write(str(msg) + '\n')
+	# Close the file
+	file_object.close()
+	# need to implement 1-rae
 
 from datetime import datetime
 
@@ -715,20 +736,20 @@ if __name__ == '__main__':
 	
 	s_now = datetime.now()
 	S_timestamp = datetime.timestamp(s_now)
-	print("Start Time =", s_now)
+	print_file("Start Time = " + str(s_now))
 
 	#!/usr/bin/env python
 	import psutil
 	# gives a single float value
-	print(psutil.cpu_percent())
+	print_file('psutil.cpu_percent(): ' + str(psutil.cpu_percent()))
 	# gives an object with many fields
-	print(psutil.virtual_memory())
+	print_file('psutil.virtual_memory(): ' + str(psutil.virtual_memory()))
 	# you can convert that object to a dictionary 
-	print(dict(psutil.virtual_memory()._asdict()))
+	print_file('psutil.virtual_memory()._asdict(): ' + str(dict(psutil.virtual_memory()._asdict())))
 	# you can have the percentage of used RAM
-	print(psutil.virtual_memory().percent)
+	print_file('percentage of used RAM: ' + str(psutil.virtual_memory().percent))
 	# you can calculate percentage of available memory
-	print(psutil.virtual_memory().available * 100 / psutil.virtual_memory().total)
+	print_file('percentage of available memory ' + str(psutil.virtual_memory().available * 100 / psutil.virtual_memory().total))
 	
 	
 	multiprocessing.freeze_support()
@@ -736,27 +757,27 @@ if __name__ == '__main__':
 	#main(5, 5, 5, 32, 'adam', 0.01, 1, 'rae', 'regression', 'BMI', 'RF', 0.99, 1e-3, 'PG', 1e-5, 'rnn', 5, 0.4, False, 'sklearn')
 
 	
-	main(5, 5, 5, 32, 'adam', 0.01, 16, 'rae', 'regression', 'BMI', 'RF', 0.99, 1e-3, 'PG', 1e-5, 'rnn', 5, 0.4, False, 'sklearn')
+	main(5, 5, 5, 32, 'adam', 0.01, 2, 'rae', 'regression', 'BMI - Copy', 'RF', 0.99, 1e-3, 'PG', 1e-5, 'rnn', 5, 0.4, False, 'sklearn')
 	
 	
 	now = datetime.now()
 	E_timestamp = datetime.timestamp(now)
-	print("Start Time =", s_now)
-	print("End Time =", now)
+	print_file("Start Time = " + str(s_now))
+	print_file("End Time =" + str(now))
 	Total = E_timestamp - S_timestamp
-	print("Total Time = " + str(Total))
+	print_file("Total Time = " + str(Total))
 
 
 	# gives a single float value
-	print(psutil.cpu_percent())
+	print_file('psutil.cpu_percent(): ' + str(psutil.cpu_percent()))
 	# gives an object with many fields
-	print(psutil.virtual_memory())
+	print_file('psutil.virtual_memory(): ' + str(psutil.virtual_memory()))
 	# you can convert that object to a dictionary 
-	print(dict(psutil.virtual_memory()._asdict()))
+	print_file('psutil.virtual_memory()._asdict(): ' + str(dict(psutil.virtual_memory()._asdict())))
 	# you can have the percentage of used RAM
-	print(psutil.virtual_memory().percent)
+	print_file('percentage of used RAM: ' + str(psutil.virtual_memory().percent))
 	# you can calculate percentage of available memory
-	print(psutil.virtual_memory().available * 100 / psutil.virtual_memory().total)
+	print_file('percentage of available memory ' + str(psutil.virtual_memory().available * 100 / psutil.virtual_memory().total))
 	
 # airfoil
 
