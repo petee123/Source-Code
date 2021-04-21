@@ -203,7 +203,7 @@ def evaluate1(X, y, num_op_unary, num_op_binary, max_order, num_batch, optimizer
 			r_r2 = cross_val_score(model, X, y, cv=5).mean()
 			return r_r2
 		elif evaluate == 'rae':
-			print_file("rae")
+			#print_file("rae")
 			y_mean = statistics.mean(y)
 			X1 = X.copy()
 			y1 = y.copy()
@@ -757,7 +757,7 @@ if __name__ == '__main__':
 	#main(5, 5, 5, 32, 'adam', 0.01, 1, 'rae', 'regression', 'BMI', 'RF', 0.99, 1e-3, 'PG', 1e-5, 'rnn', 5, 0.4, False, 'sklearn')
 
 	
-	main(5, 5, 5, 32, 'adam', 0.01, 2, 'rae', 'regression', 'BMI - Copy', 'RF', 0.99, 1e-3, 'PG', 1e-5, 'rnn', 5, 0.4, False, 'sklearn')
+	main(5, 5, 50, 32, 'adam', 0.01, 2, 'rae', 'regression', 'Airfoil - Copy', 'RF', 0.99, 1e-3, 'PG', 1e-5, 'rnn', 5, 0.4, False, 'sklearn')
 	
 	
 	now = datetime.now()
