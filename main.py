@@ -757,7 +757,7 @@ if __name__ == '__main__':
 	#main(5, 5, 5, 32, 'adam', 0.01, 1, 'rae', 'regression', 'BMI', 'RF', 0.99, 1e-3, 'PG', 1e-5, 'rnn', 5, 0.4, False, 'sklearn')
 
 	
-	main(5, 5, 50, 32, 'adam', 0.01, 2, 'rae', 'regression', 'Airfoil - Copy', 'RF', 0.99, 1e-3, 'PG', 1e-5, 'rnn', 5, 0.4, False, 'sklearn')
+	main(5, 5, 5, 32, 'adam', 0.01, 2, 'rae', 'regression', 'BMI', 'RF', 0.99, 1e-3, 'PG', 1e-5, 'rnn', 5, 0.4, False, 'sklearn')
 	
 	
 	now = datetime.now()
