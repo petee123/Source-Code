@@ -27,7 +27,7 @@ https://www.tensorflow.org/install/pip?hl=zh-tw
 # compile and execute the program
 6. create the python launch.json 
 
-7. open the file 5002_demo.py
+7. open the file main.py
 
 8. execute the program. (shortcut key: F5) (if there are some error related to the library, need to install the missing library follow the message)
 
