@@ -1,12 +1,12 @@
 # Project Title: Neural Feature Search: A Neural Architecture for Automated Feature Engineering
 
 # testing system environment
-Operating system: Windows 10 version 20H2 build:19042.928
-CPU: Intel(R) Core(TM) i5-8400 CPU @ 2.80GHz   2.81 GHz
-Main Memory: DDR4 16GB
-Display Card: NVIDIA Geforce GTX 1060 5G
-IDE: Visual studio code
-Program Language: Python 3.8.5
+- Operating system: Windows 10 version 20H2 build:19042.928
+- CPU: Intel(R) Core(TM) i5-8400 CPU @ 2.80GHz   2.81 GHz
+- Main Memory: DDR4 16GB
+- Display Card: NVIDIA Geforce GTX 1060 5G
+- IDE: Visual studio code
+- Program Language: Python 3.8.5
 
 
 # setup environment, compile and execute the program
