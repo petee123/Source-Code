@@ -9,7 +9,7 @@
 - Program Language: Python 3.8.5
 
 
-# setup environment, compile and execute the program
+# setup python environment
 
 1. install python
 
@@ -24,6 +24,7 @@ https://www.tensorflow.org/install/pip?hl=zh-tw
 
 5. install visual studio and install the python extension
 
+# compile and execute the program
 6. create the python launch.json 
 
 7. open the file 5002_demo.py
