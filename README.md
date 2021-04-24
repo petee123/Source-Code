@@ -11,18 +11,14 @@ Program Language: Python 3.8.5
 
 # setup environment, compile and execute the program
 
-1. 
-install python
+1. install python
 
-2. 
 # install the necessary library from requirements.txt
-"pip install -r requirements.txt"
+2. execute command "pip install -r requirements.txt"
 
-3. 
-install correct version NVIDIA CUDA Toolkit (dependent on the display card model)
+3. install correct version NVIDIA CUDA Toolkit (dependent on the display card model)
 
-4. 
-install correct tensorflow library  (need to install tensorflow 2 or above) 
+4. install correct tensorflow library  (need to install tensorflow 2 or above) 
 Reference link:
 https://www.tensorflow.org/install/pip?hl=zh-tw
 
@@ -36,13 +32,13 @@ https://www.tensorflow.org/install/pip?hl=zh-tw
 
 # the description of each source file
 Folder: 
-databset: save all test data set file
-log: save all log and print information, include the test result file
-.vscode: include the sample launch.json
+1. databset: save all test data set file
+2. log: save all log and print information, include the test result file
+3. .vscode: include the sample launch.json
 
 File:
-requirement.txt: include the required librarys for this project which can be generated on the requirement file
-main.py: main program 
+1. requirement.txt: include the required librarys for this project which can be generated on the requirement file
+2. main.py: main program 
 
 # an example to show how to run the program
-press shortcut key F5 in visual studio code or execute the cmd "python main.py"
+1. press shortcut key F5 in visual studio code or execute the cmd "python main.py"
